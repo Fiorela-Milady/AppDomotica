@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{base :: head}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${titulo}">Modo Noche</title>
+  <!-- CSS de Bootstrap -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div th:replace="~{base :: navbar}"></div>
+
+<!-- Contenido Principal -->
+<div class="container mt-5 d-flex justify-content-center">
+  <div class="card p-4 shadow-lg text-center" style="max-width: 600px; width: 100%;">
+    <h2 class="mb-4" th:text="${titulo}">Control de Modo Noche</h2>
+    <p class="text-muted">Activa o desactiva el Modo Noche para una iluminación tenue en el hogar.</p>
+
+    <!-- Indicador de estado actual del Modo Noche -->
+    <div class="alert" th:classappend="${modoNocheActivo} ? 'alert-success' : 'alert-secondary'">
+      <span th:text="${modoNocheActivo} ? 'Modo Noche actualmente activado' : 'Modo Noche actualmente desactivado'"></span>
+    </div>
+
+    <!-- Toggle Switch -->
+    <label class="toggle-switch">
+      <input type="checkbox" id="modoNocheToggle" th:checked="${modoNocheActivo}" onchange="cambiarModoNoche(this.checked)">
+      <span class="slider"></span>
+    </label>
+    <p class="mt-3" id="estadoToggleTexto" th:text="${modoNocheActivo} ? 'Modo Noche Activado' : 'Modo Noche Desactivado'"></p>
+
+  </div>
+</div>
+<br>
+
+<!-- Modal para cambio de estado en progreso -->
+<div class="modal fade" id="modalCambioEstado" tabindex="-1" aria-labelledby="modalCambioEstadoLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <p>Cambiando el estado de Modo Noche...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts de Bootstrap y otros scripts necesarios -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script>
+  function cambiarModoNoche(activar) {
+    // Mostrar modal de cambio de estado
+    const modal = new bootstrap.Modal(document.getElementById('modalCambioEstado'));
+    modal.show();
+
+    fetch('/domotica/cambiarModoNoche', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: 'activar=' + activar
+    })
+            .then(response => response.json())
+            .then(data => {
+              modal.hide();
+              const estadoTexto = document.getElementById('estadoToggleTexto');
+              const alertaEstado = document.querySelector('.alert');
+
+              // Actualizar el texto del estado según la respuesta
+              if (data.success) {
+                estadoTexto.textContent = activar ? 'Modo Noche Activado' : 'Modo Noche Desactivado';
+                alertaEstado.className = activar ? 'alert alert-success' : 'alert alert-secondary';
+                alertaEstado.textContent = activar ? 'Modo Noche actualmente activado' : 'Modo Noche actualmente desactivado';
+              } else {
+                alertaEstado.className = 'alert alert-danger';
+                alertaEstado.textContent = 'Error al cambiar el estado de Modo Noche';
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              modal.hide();
+              const alertaEstado = document.querySelector('.alert');
+              alertaEstado.className = 'alert alert-danger';
+              alertaEstado.textContent = 'Error en la comunicación con el servidor.';
+            });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{base :: head}">
+
+</head>
+
+<body>
+
+<div th:replace="~{base :: navbar}"></div>
+
+<div class="container mt-5 text-center">
+    <h2 class="display-4">
+        Bienvenido,
+        <span th:if="${session.usuario != null}" th:text="${session.usuario.nombre}">Usuario</span>
+        <span th:if="${session.usuario == null}">Usuario</span>
+    </h2>
+    <p class="lead text-muted">
+        <span th:if="${session.usuario != null}">Explora las opciones de gestión disponibles.</span>
+        <span th:if="${session.usuario == null}">Por favor, inicia sesión para acceder al sistema.</span>
+    </p>
+
+    <!-- Cards de Gestión para el ADMIN -->
+    <div class="row mt-4" th:if="${session.usuario != null and session.usuario.rol.name() == 'ADMIN'}">
+
+        <!-- Card: Gestión de Usuarios -->
+        <div class="col-md-4 mb-4">
+            <div class="card animated-card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-users"></i> Gestión de Usuarios</h5>
+                    <p class="card-text">Administra los usuarios del sistema, asigna roles y permisos.</p>
+                    <a th:href="@{/admin/gestionUsuarios}" class="btn btn-primary">Ir a Gestión de Usuarios</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Asignar Permisos -->
+        <div class="col-md-4 mb-4">
+            <div class="card animated-card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-key"></i> Asignar Permisos</h5>
+                    <p class="card-text">Administra los permisos para controlar el acceso a las variables del sistema.</p>
+                    <a th:href="@{/admin/gestionPermisos}" class="btn btn-primary">Ir a Asignación de Permisos</a>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Card: Listado de Variables -->
+        <div class="col-md-4 mb-4">
+            <div class="card animated-card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-database"></i> Listado de Variables</h5>
+                    <p class="card-text">Visualiza y gestiona todas las variables del sistema.</p>
+                    <a th:href="@{/domotica/listarVariables}" class="btn btn-primary">Ver Variables</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row mt-4" th:if="${session.usuario != null and session.usuario.rol.name() == 'USUARIO'}">
+
+
+        <!-- Card: Configuración de Horarios de Luces -->
+        <div class="col-md-4 mb-4">
+            <div class="card animated-card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-lightbulb"></i> Horarios de Luces Exteriores</h5>
+                    <p class="card-text">Configura el encendido y apagado automático de las luces exteriores.</p>
+                    <a th:href="@{/domotica/verConfigurarLuces}" class="btn btn-primary">Configurar Luces</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Configuración de Alarma -->
+        <div class="col-md-4 mb-4">
+            <div class="card animated-card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-bell"></i> Configuración de Alarma</h5>
+                    <p class="card-text">Define cuándo debe activarse la alarma automáticamente.</p>
+                    <a th:href="@{/domotica/verConfigurarAlarma}" class="btn btn-primary">Configurar Alarma</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card animated-card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-toggle-on"></i> Control Manual de Luces</h5>
+                    <p class="card-text">Enciende o apaga luces específicas de manera manual.</p>
+                    <a th:href="@{/domotica/controlManualLuces}" class="btn btn-primary">Controlar Luces</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card p-3 animated-card">
+                <h5 class="card-title">
+                    <i class="fas fa-thermometer-half"></i> Monitoreo de Temperatura
+                </h5>
+                <p class="card-text">Consulta la temperatura actual del ambiente en tiempo real.</p>
+                <a th:href="@{/domotica/monitoreoTemperatura}" class="btn btn-primary">Ver Temperatura</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card p-3 animated-card">
+                <h5 class="card-title">
+                    <i class="fas fa-warehouse"></i> Estado del Garaje
+                </h5>
+                <p class="card-text">Consulta y cambia el estado del garaje. Recibe notificaciones en tiempo real cuando el garaje se abre o se cierra.</p>
+                <a th:href="@{/domotica/controlGaraje}" class="btn btn-primary">Ir a Control del Garaje</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card p-3 animated-card">
+                <h5 class="card-title">
+                    <i class="fas fa-moon"></i> Modo Noche
+                </h5>
+                <p class="card-text">Activa o desactiva el Modo Noche para una iluminación tenue durante la noche. Este modo enciende únicamente las luces del hall y el pasadizo.</p>
+                <a th:href="@{/domotica/controlModoNoche}" class="btn btn-primary">Activar Modo Noche</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card p-3 animated-card">
+                <h5 class="card-title">
+                    <i class="fas fa-door-open"></i> Estado de la Puerta
+                </h5>
+                <p class="card-text">Supervisa la apertura y cierre de la puerta en tiempo real. Recibirás notificaciones por voz si la puerta permanece abierta por un tiempo prolongado o si se ha cerrado correctamente.</p>
+                <a th:href="@{/domotica/alertaPuerta}" class="btn btn-primary">Ver Estado de la Puerta</a>
+            </div>
+        </div>
+
+
+    </div>
+
+</div>
+
+<!-- Modal de Alerta de Gas -->
+<div class="modal fade" id="modalAlertaGas" tabindex="-1" aria-labelledby="modalAlertaGasLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalAlertaGasLabel">¡Alerta de Seguridad!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="mensajeAlertaGas">
+                    Nivel alto de gas detectado. <br>
+                    <strong>Recomendación:</strong> Ventile el área y no use dispositivos eléctricos.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Alerta de Puerta Abierta -->
+<!-- Modal de Alerta de Puerta Abierta -->
+<div class="modal fade" id="modalAlertaPuerta" tabindex="-1" aria-labelledby="modalAlertaPuertaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="modalAlertaPuertaLabel">¡Recordatorio de Puerta Abierta!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p id="mensajeAlertaPuerta">La puerta ha estado abierta. Por favor, ciérrela para mayor seguridad.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Notificación de Cierre de Puerta -->
+<div class="modal fade" id="modalCierrePuerta" tabindex="-1" aria-labelledby="modalCierrePuertaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalCierrePuertaLabel">¡Notificación de Cierre de Puerta!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="mensajeCierrePuerta">La puerta ha sido cerrada y asegurada.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{base :: footer}"></div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const cards = document.querySelectorAll(".animated-card");
+
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.classList.add("show");
+            }, index * 200);
+        });
+
+        cards.forEach((card) => {
+            card.addEventListener("mouseover", () => card.classList.add("hovered"));
+            card.addEventListener("mouseout", () => card.classList.remove("hovered"));
+        });
+
+    });
+</script>
+
+<script th:if="${session.usuario != null and session.usuario.rol.name() == 'USUARIO'}">
+
+    function reproducirMensajeVoz(mensaje) {
+        const mensajeVoz = new SpeechSynthesisUtterance(mensaje);
+        mensajeVoz.lang = 'es-ES';
+        console.log("Mensaje para reproducir:", mensaje);
+
+        speechSynthesis.cancel();
+        setTimeout(() => {
+            speechSynthesis.speak(mensajeVoz);
+        }, 100);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // ==== ALERTA Y ESTADO DE PUERTA ====
+        const socketPuerta = new SockJS('/websocket-endpoint');
+        const stompClientPuerta = Stomp.over(socketPuerta);
+
+        let modalAlertaPuerta, modalCierrePuerta;
+        let modalVisiblePuerta = false;
+        let puertaAbierta = false;
+        let mensajeCerradoMostrado = false; // Control para mostrar el mensaje de "cerrada" solo una vez
+        let intervaloPuertaAbierta; // Intervalo para mensaje repetido de puerta abierta
+
+        stompClientPuerta.connect({}, function (frame) {
+            console.log('Conectado para estado de la puerta: ' + frame);
+
+            // Suscripción para alertas de puerta abierta
+            stompClientPuerta.subscribe('/topic/alertaPuerta', function (message) {
+                puertaAbierta = true;
+                mensajeCerradoMostrado = false; // Resetear para permitir mostrar mensaje de cerrado en el futuro
+                iniciarMensajesPuertaAbierta();
+                mostrarModalAlertaPuerta();
+            });
+
+            // Suscripción para notificación de cierre de puerta
+            stompClientPuerta.subscribe('/topic/notificacionCierrePuerta', function (message) {
+                puertaAbierta = false;
+                detenerMensajesPuertaAbierta();
+                mostrarModalCierrePuerta();
+            });
+
+            // Suscripción para actualización de estado de la puerta
+            stompClientPuerta.subscribe('/topic/estadoPuerta', function (message) {
+                puertaAbierta = (message.body === 'abierta');
+                if (puertaAbierta) {
+                    iniciarMensajesPuertaAbierta();
+                } else {
+                    detenerMensajesPuertaAbierta();
+                    mostrarModalCierrePuerta();
+                }
+            });
+        }, function (error) {
+            console.error("Error en la conexión WebSocket para puerta:", error);
+        });
+
+        // Función para iniciar mensajes repetidos cuando la puerta está abierta
+        function iniciarMensajesPuertaAbierta() {
+            if (!puertaAbierta) return;
+            detenerMensajesPuertaAbierta(); // Asegurarse de que no haya duplicados
+            intervaloPuertaAbierta = setInterval(() => {
+                reproducirMensajeVoz("La puerta está abierta. Por favor, ciérrela.");
+            }, 5000);
+        }
+
+        // Función para detener mensajes repetidos cuando la puerta se cierra
+        function detenerMensajesPuertaAbierta() {
+            clearInterval(intervaloPuertaAbierta);
+            intervaloPuertaAbierta = null;
+        }
+
+        // Función para mostrar el modal de alerta de puerta abierta
+        function mostrarModalAlertaPuerta() {
+            if (puertaAbierta && !modalVisiblePuerta) {
+                modalAlertaPuerta = new bootstrap.Modal(document.getElementById('modalAlertaPuerta'));
+                modalAlertaPuerta.show();
+                modalVisiblePuerta = true;
+                reproducirMensajeVoz("La puerta está abierta. Por favor, ciérrela.");
+            }
+        }
+
+        // Función para mostrar el modal de notificación de cierre de puerta
+        function mostrarModalCierrePuerta() {
+            if (!puertaAbierta && !mensajeCerradoMostrado) {
+                if (!modalCierrePuerta) {
+                    modalCierrePuerta = new bootstrap.Modal(document.getElementById('modalCierrePuerta'));
+                }
+                modalCierrePuerta.show();
+                reproducirMensajeVoz("La puerta ha sido cerrada y asegurada.");
+                mensajeCerradoMostrado = true; // Asegurar que el mensaje solo se muestre una vez
+            }
+        }
+
+        // Cerrar el modal de alerta de puerta cuando se oculta
+        document.getElementById('modalAlertaPuerta').addEventListener('hidden.bs.modal', function () {
+            modalVisiblePuerta = false;
+        });
+
+        // Cerrar el modal de notificación de cierre de puerta cuando se oculta
+        document.getElementById('modalCierrePuerta').addEventListener('hidden.bs.modal', function () {
+            modalCierrePuerta = null;
+        });
+    });
+</script>
+
+
+
+</body>
+</html>

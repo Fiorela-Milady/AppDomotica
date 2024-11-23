@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${title}">Sistema de Gestión</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f5f7;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .container-main {
+      padding-top: 20px;
+      flex: 1;
+    }
+
+    /* Estilo del Navbar */
+    .navbar {
+      background-color: #003459;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .navbar .navbar-brand {
+      color: #00a8e8;
+      font-weight: bold;
+      font-size: 1.25rem;
+      transition: color 0.3s;
+    }
+    .navbar .navbar-brand:hover {
+      color: #007ea7;
+    }
+    .navbar .navbar-nav .nav-link {
+      color: #00a8e8;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: color 0.3s, background-color 0.3s;
+      padding: 8px 15px;
+      border-radius: 5px;
+    }
+    .navbar .navbar-nav .nav-link:hover {
+      color: #00171f;
+      background-color: #007ea7;
+    }
+    .navbar .navbar-toggler {
+      border-color: #00a8e8;
+    }
+    .navbar .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30' fill='white'><path stroke='rgba(0, 168, 232, 1)' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg>");
+    }
+
+    /* Estilo del Footer */
+    footer {
+      background-color: #00171f;
+      color: #f0f5f7;
+      font-size: 0.9rem;
+      padding: 15px 0;
+      text-align: center;
+      width: 100%;
+      margin-top: auto;
+    }
+
+    footer a {
+      color: #00a8e8;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    footer a:hover {
+      color: #007ea7;
+    }
+
+    /* Fondo suave para el contenido principal */
+    .container-main {
+      background-color: #f0f5f7;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .animated-card {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .animated-card.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .animated-card.hovered {
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Modern table design */
+    .table {
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    thead {
+      background-color: #003459;
+      color: #f0f5f7;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    tbody tr {
+      transition: all 0.2s ease;
+    }
+    tbody tr:hover {
+      background-color: #00a8e8;
+      color: #f0f5f7;
+      transform: scale(1.01);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    tbody tr td {
+      padding: 15px;
+      border-top: 1px solid #d1e8ed;
+    }
+    tbody tr td:first-child {
+      font-weight: 500;
+      color: #003459;
+    }
+    .table-dark th {
+      border: none;
+    }
+
+    .circle-card {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      cursor: pointer;
+      color: white;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      border: none;
+      margin: 0 auto; /* Centra horizontalmente */
+    }
+
+    /* Estado Encendido (Amarillo) */
+    .circle-card.on {
+      background: linear-gradient(145deg, #fadb50, #f1c40f); /* Degradado amarillo */
+      box-shadow: 0px 4px 20px rgba(245, 205, 49, 0.8), 0px 0px 8px rgba(245, 205, 49, 0.6); /* Brillo amarillo */
+      border: 2px solid #f1c40f;
+    }
+
+    /* Estado Apagado (Gris oscuro) */
+    .circle-card.off {
+      background: linear-gradient(145deg, #555555, #2c2c2c); /* Degradado gris oscuro */
+      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5), inset 0px 0px 4px rgba(0, 0, 0, 0.3); /* Sombra tenue */
+      border: 2px solid #2c2c2c;
+    }
+
+    .circle-card:hover {
+      transform: scale(1.15); /* Aumenta el tamaño al pasar el ratón */
+      box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.3); /* Efecto adicional */
+    }
+
+    /* Centrar el nombre de la luz debajo del botón */
+    .text-center2 .circle-card {
+      margin: 0 auto; /* Centra el botón */
+    }
+
+    .text-center2 p {
+      margin-top: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      text-align: center;
+    }
+
+
+    /*--------------------------------------------------------------*/
+    /*--------------------------------------------------------------*/
+    /* Estilo del contenedor principal */
+    .card34 {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: transform 0.2s ease-in-out;
+    }
+    .card34:hover {
+      transform: scale(1.02);
+    }
+
+    .temperature-circle {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      color: white;
+      font-size: 3rem;
+      font-weight: bold;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      box-shadow: 0 4px 12px rgba(66, 166, 255, 0.4);
+      animation: gradientAnimation 12s infinite alternate;
+    }
+
+    /* Animación de gradiente de fondo */
+    @keyframes gradientAnimation {
+      0% {
+        background: linear-gradient(135deg, #89f7fe, #66a6ff);
+      }
+      25% {
+        background: linear-gradient(135deg, #66a6ff, #8e44ad);
+      }
+      50% {
+        background: linear-gradient(135deg, #8e44ad, #3498db);
+      }
+      75% {
+        background: linear-gradient(135deg, #3498db, #66a6ff);
+      }
+      100% {
+        background: linear-gradient(135deg, #66a6ff, #89f7fe);
+      }
+    }
+
+
+    .temperature-circle h3 {
+      z-index: 1;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+
+    .last-update {
+      font-size: 0.9rem;
+      color: #777;
+    }
+
+     /* **************************************      */
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    /****************************/
+
+
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light" th:fragment="navbar">
+  <div class="container">
+    <a class="navbar-brand" th:if="${session.usuario != null}" th:href="@{/panel}">Sistema de Gestión IoT</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+
+
+        <li class="nav-item" th:if="${session.usuario != null}">
+          <a class="nav-link" th:href="@{/panel}">
+            <i class="fas fa-info-circle"></i> Administración
+          </a>
+        </li>
+
+        <li class="nav-item d-flex align-items-center">
+          <span class="nav-link" th:text="${session.usuario.nombre + ' | ' + session.usuario.rol.name()}"></span>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/logout}">Cerrar Sesión</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+<!-- Contenido Principal -->
+<div class="container container-main">
+  <h2>Bienvenido <span th:text="${session.usuario.nombre}">Usuario</span></h2>
+  <p class="lead text-muted">Explora las opciones de gestión disponibles a continuación.</p>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="text-center p-3">
+    © 2024 Tu Empresa | Todos los derechos reservados
+  </div>
+</footer>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+
+
+
+</body>
+</html>

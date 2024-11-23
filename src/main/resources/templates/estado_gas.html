@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{base :: head}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${titulo}">Estado del Gas</title>
+  <!-- CSS de Bootstrap -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Navbar -->
+<div th:replace="~{base :: navbar}"></div>
+
+<!-- Contenido Principal -->
+<div class="container mt-5 d-flex justify-content-center">
+  <div class="card p-4 shadow-lg text-center" style="max-width: 600px; width: 100%;">
+    <h2 class="mb-4">Estado del Gas</h2>
+
+    <!-- Estado Actual del Gas -->
+    <div class="alert alert-info">
+      <h3>Nivel Actual de Gas:</h3>
+      <p><strong th:text="${nivelGas}">0</strong> ppm</p>
+      <small class="text-muted">Última actualización: <span th:text="${ultimaActualizacion}">Desconocido</span></small>
+    </div>
+  </div>
+</div>
+<br>
+
+
+<!-- Modal de Alerta de Gas -->
+<div class="modal fade" id="modalAlertaGas" tabindex="-1" aria-labelledby="modalAlertaGasLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalAlertaGasLabel">¡Alerta de Seguridad!</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="mensajeAlertaGas">
+          Nivel alto de gas detectado. <br>
+          <strong>Recomendación:</strong> Ventile el área y no use dispositivos eléctricos.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Scripts de Bootstrap y otros scripts necesarios -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const socket = new SockJS('/websocket-endpoint');
+    const stompClient = Stomp.over(socket);
+    let modalAlertaGas;  // Instancia del modal
+    let modalVisible = false; // Estado del modal
+
+    // Conexión al WebSocket
+    stompClient.connect({}, function(frame) {
+      console.log('Conectado: ' + frame);
+
+      // Suscripción al tópico para recibir alertas de gas en tiempo real
+      stompClient.subscribe('/topic/alertaGas', function(message) {
+        document.getElementById("mensajeAlertaGas").textContent = message.body;
+
+        // Mostrar el modal solo si no está visible
+        if (!modalVisible) {
+          modalAlertaGas = new bootstrap.Modal(document.getElementById('modalAlertaGas'));
+          modalAlertaGas.show();
+          modalVisible = true;
+        }
+      });
+    }, function(error) {
+      console.error("Error en la conexión WebSocket:", error);
+    });
+
+    // Evento para actualizar el estado cuando el modal se cierra
+    document.getElementById('modalAlertaGas').addEventListener('hidden.bs.modal', function () {
+      modalVisible = false; // Permitir que el modal se vuelva a mostrar si se cierra
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{base :: head}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">Control Manual de Luces</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body>
+
+<!-- Navbar -->
+<div th:replace="~{base :: navbar}"></div>
+
+<!-- Contenido Principal -->
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="card p-4 shadow-lg text-center2" style="max-width: 600px; width: 100%;">
+        <h2 class="mb-4" th:text="${titulo}" style="text-align: center">Control Manual de Luces</h2>
+
+        <div class="row">
+            <!-- Bucle para mostrar solo luces como un botón circular -->
+            <div class="col-4 mb-4" th:each="luz : ${luces}" th:if="${luz.nombre.contains('luz')}">
+                <!-- Botón circular con AJAX -->
+                <button type="button"
+                        class="circle-card"
+                        th:classappend="${luz.valorActual == 'true' ? 'on' : 'off'}"
+                        th:data-luz-id="${luz.idArduino}">
+                    <i class="fas fa-lightbulb"></i>
+                </button>
+                <p th:text="${luz.nombre}" class="mt-2"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<br>
+
+<!-- Footer -->
+<div th:replace="~{base :: footer}"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.circle-card').on('click', function(event) {
+            event.preventDefault();
+
+            const button = $(this);
+            const luzId = button.data('luz-id');
+            const encender = button.hasClass('off');
+
+            $('#modalCarga').modal('show');
+
+            $.ajax({
+                url: '/domotica/cambiarEstadoLuz',
+                type: 'POST',
+                data: { luzId: luzId, encender: encender },
+                success: function(response) {
+                    if (response.success) {
+                        setTimeout(function() {
+                            actualizarEstadoLuz(button, luzId);
+                        }, 5000);
+                    } else {
+                        alert(response.message);
+                        $('#modalCarga').modal('hide');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert("Error en la solicitud AJAX: " + error);
+                    $('#modalCarga').modal('hide');
+                }
+            });
+        });
+
+        function actualizarEstadoLuz(button, luzId) {
+            $.ajax({
+                url: '/domotica/controlManualLuces',
+                type: 'GET',
+                success: function(html) {
+                    const newButton = $(html).find(`[data-luz-id="${luzId}"]`);
+                    const newClass = newButton.hasClass('on') ? 'on' : 'off';
+
+                    button.removeClass('on off').addClass(newClass);
+
+                    $('#modalCarga').modal('hide');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error al actualizar el estado de la luz:", error);
+                    $('#modalCarga').modal('hide');
+                }
+            });
+        }
+    });
+</script>
+
+
+<!-- Modal de carga -->
+<div class="modal fade" id="modalCarga" tabindex="-1" aria-labelledby="modalCargaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCargaLabel">Cambiando Estado de Luz</h5>
+            </div>
+            <div class="modal-body text-center">
+                <p>Por favor espera mientras se cambia el estado de la luz...</p>
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

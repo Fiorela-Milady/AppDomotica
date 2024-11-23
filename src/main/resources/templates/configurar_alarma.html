@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{base :: head}">
+    <title>Configurar Alarma Automática</title>
+</head>
+<body>
+
+<div th:replace="~{base :: navbar}"></div>
+
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="card p-4 shadow-lg" style="max-width: 600px; width: 100%;">
+        <h2 class="text-center">Configurar Alarma Automática</h2>
+
+        <form th:action="@{/domotica/guardarHorarioAlarma}" method="post" class="needs-validation" novalidate>
+
+            <!-- Activar Alarma Checkbox -->
+            <div class="form-check mb-3">
+                <input type="checkbox" class="form-check-input" id="activarAlarma" name="activarAlarma"
+                       th:checked="${horarioAlarma.activo}">
+                <label class="form-check-label" for="activarAlarma">Activar Alarma</label>
+            </div>
+
+            <!-- Hora de Inicio -->
+            <div class="mb-3">
+                <label for="horaInicio" class="form-label">Hora de Inicio</label>
+                <input type="time" class="form-control" id="horaInicio" name="horaInicio"
+                       th:value="${horaInicioFormatted}" required>
+                <div class="invalid-feedback">
+                    Por favor, proporciona una hora de inicio válida.
+                </div>
+            </div>
+
+            <!-- Hora de Fin -->
+            <div class="mb-3">
+                <label for="horaFin" class="form-label">Hora de Fin</label>
+                <input type="time" class="form-control" id="horaFin" name="horaFin"
+                       th:value="${horaFinFormatted}" required>
+                <div class="invalid-feedback">
+                    Por favor, proporciona una hora de fin válida.
+                </div>
+            </div>
+
+            <!-- Botones de Guardar y Cancelar -->
+            <div class="d-flex justify-content-between mt-4">
+                <button type="submit" class="btn btn-primary" style="width: 48%;">Guardar Configuración</button>
+                <a th:href="@{/panel}" class="btn btn-secondary" style="width: 48%;">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{base :: footer}"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script>
+    (function () {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{base :: head}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">Monitoreo de Temperatura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body>
+
+<!-- Navbar -->
+<div th:replace="~{base :: navbar}"></div>
+
+<!-- Contenido Principal -->
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="card34 p-4 shadow-lg text-center" style="max-width: 600px; width: 100%;">
+        <h2 class="mb-4" style="text-align: center;">Monitoreo de Temperatura</h2>
+
+        <!-- Círculo de Temperatura -->
+        <div class="temperature-circle">
+            <h3 th:text="${temperatura != null ? temperatura + ' °C' : 'No disponible'}"></h3>
+        </div>
+
+        <!-- Última actualización -->
+        <p class="last-update mt-3" th:text="${ultimaActualizacion != null ? 'Última actualización: ' + ultimaActualizacion : ''}"></p>
+
+        <!-- Mensaje de Error -->
+        <div th:if="${error != null}">
+            <p class="text-danger" th:text="${error}"></p>
+        </div>
+    </div>
+</div>
+<br>
+
+<!-- Footer -->
+<div th:replace="~{base :: footer}"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+</body>
+</html>

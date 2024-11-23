@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{base :: head}">
+</head>
+<body>
+
+<div th:replace="~{base :: navbar}"></div>
+
+<div class="container mt-5 d-flex justify-content-center">
+  <div class="card" style="border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); background-color: #ffffff; max-width: 600px; width: 100%;">
+    <div style="background-color: #007bff; color: white; font-weight: bold; padding: 15px; border-radius: 10px 10px 0 0; text-align: center; font-size: 18px;">
+      Configurar Horario Automático de Luces Exteriores
+    </div>
+
+    <div class="card-body" style="padding: 20px;">
+      <form th:action="@{/domotica/guardarHorarioLuces}" method="post" class="needs-validation" novalidate>
+        <div style="margin-bottom: 1.5rem;">
+          <label for="activarAnochecer" style="font-weight: bold; margin-bottom: 8px; display: block;">Activar al Anochecer</label>
+          <select id="activarAnochecer" name="activarAnochecer" class="form-select" required onchange="toggleHora('activarAnochecer', 'horaEncendidoDiv')" style="border-radius: 5px; font-size: 14px;">
+            <option th:value="true" th:selected="${horario.horaEncendido != null}">Sí</option>
+            <option th:value="false" th:selected="${horario.horaEncendido == null}">No</option>
+          </select>
+          <div class="invalid-feedback" style="font-size: 12px; color: red;">Por favor, selecciona si deseas activar las luces al anochecer.</div>
+        </div>
+
+        <div id="horaEncendidoDiv" th:classappend="${horario.horaEncendido != null ? 'd-block' : 'd-none'}" style="margin-bottom: 1.5rem;">
+          <label for="horaEncendido" style="font-weight: bold; margin-bottom: 8px; display: block;">Hora de Encendido</label>
+          <input type="time" id="horaEncendido" name="horaEncendido" class="form-control" th:value="${horaEncendidoFormatted}" style="border-radius: 5px; font-size: 14px;">
+          <div class="invalid-feedback" style="font-size: 12px; color: red;">Por favor, selecciona una hora de encendido.</div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label for="desactivarAmanecer" style="font-weight: bold; margin-bottom: 8px; display: block;">Apagar al Amanecer</label>
+          <select id="desactivarAmanecer" name="desactivarAmanecer" class="form-select" required onchange="toggleHora('desactivarAmanecer', 'horaApagadoDiv')" style="border-radius: 5px; font-size: 14px;">
+            <option th:value="true" th:selected="${horario.horaApagado != null}">Sí</option>
+            <option th:value="false" th:selected="${horario.horaApagado == null}">No</option>
+          </select>
+          <div class="invalid-feedback" style="font-size: 12px; color: red;">Por favor, selecciona si deseas apagar las luces al amanecer.</div>
+        </div>
+
+        <div id="horaApagadoDiv" th:classappend="${horario.horaApagado != null ? 'd-block' : 'd-none'}" style="margin-bottom: 1.5rem;">
+          <label for="horaApagado" style="font-weight: bold; margin-bottom: 8px; display: block;">Hora de Apagado</label>
+          <input type="time" id="horaApagado" name="horaApagado" class="form-control" th:value="${horaApagadoFormatted}" style="border-radius: 5px; font-size: 14px;">
+          <div class="invalid-feedback" style="font-size: 12px; color: red;">Por favor, selecciona una hora de apagado.</div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between;">
+          <button type="submit" class="btn btn-primary" style="background-color: #007bff; border: none; font-size: 16px; width: 48%;">Guardar Configuración</button>
+          <a th:href="@{/panel}" class="btn btn-secondary" style="background-color: #6c757d; border: none; font-size: 16px; width: 48%;">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div th:replace="~{base :: footer}"></div>
+
+<script>
+  (function () {
+    'use strict';
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
+
+  function toggleHora(selectId, timeDivId) {
+    const selectElement = document.getElementById(selectId);
+    const timeDiv = document.getElementById(timeDivId);
+    timeDiv.classList.toggle('d-none', selectElement.value !== "true");
+    timeDiv.classList.toggle('d-block', selectElement.value === "true");
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    toggleHora('activarAnochecer', 'horaEncendidoDiv');
+    toggleHora('desactivarAmanecer', 'horaApagadoDiv');
+  });
+</script>
+
+</body>
+</html>

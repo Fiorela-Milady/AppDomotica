@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head th:replace="~{base :: head}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">Estado de la Puerta</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body>
+
+<!-- Navbar -->
+<div th:replace="~{base :: navbar}"></div>
+
+<!-- Contenido Principal -->
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="card p-4 shadow-lg text-center" style="max-width: 600px; width: 100%;">
+        <h2 class="mb-4">Estado de la Puerta</h2>
+
+        <!-- Estado Actual de la Puerta -->
+        <div class="alert alert-info">
+            <h3>Estado Actual:</h3>
+            <p><strong id="estadoPuertaTexto" th:text="${estadoPuerta}">Desconocido</strong></p>
+        </div>
+
+        <!-- Botones para abrir y cerrar la puerta -->
+        <div class="d-flex justify-content-center gap-3">
+            <button id="btnAbrirPuerta" class="btn btn-success" onclick="cambiarEstadoPuerta(true)">Abrir Puerta</button>
+            <button id="btnCerrarPuerta" class="btn btn-danger" onclick="cambiarEstadoPuerta(false)">Cerrar Puerta</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Progreso -->
+<div class="modal fade" id="modalProgresoPuerta" tabindex="-1" aria-labelledby="modalProgresoPuertaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalProgresoPuertaLabel">Espere por favor...</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p id="mensajeProgresoPuerta">La puerta se está procesando. Esto puede tardar unos segundos...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts de Bootstrap y WebSocket -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script>
+    let progresoModalVisible = false; // Controla si el modal de progreso está visible
+    let intervaloVozAbierta; // Intervalo para la voz repetida cuando la puerta está abierta
+    let puertaAbierta = false; // Estado de la puerta actual
+    const modalProgresoPuerta = new bootstrap.Modal(document.getElementById('modalProgresoPuerta'));
+
+    function cambiarEstadoPuerta(abrir) {
+        const estado = abrir ? "abriendo" : "cerrando";
+        document.getElementById("mensajeProgresoPuerta").textContent = `La puerta se está ${estado}...`;
+
+        // Mostrar modal de progreso y bloquear otros mensajes
+        modalProgresoPuerta.show();
+        progresoModalVisible = true;
+
+        detenerVoz(); // Detener cualquier mensaje de voz actual
+
+        // Llamada al backend para cambiar el estado de la puerta
+        fetch('/domotica/cambiarEstadoPuerta', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({ abrir })
+        })
+            .then(response => response.json())
+            .then(data => {
+                setTimeout(() => {
+                    progresoModalVisible = false; // Marcar progreso como completado
+                    modalProgresoPuerta.hide();
+
+                    if (data.success) {
+                        // Actualizar el estado visual basado en la respuesta del servidor
+                        document.getElementById("estadoPuertaTexto").textContent = data.estado;
+
+                        if (data.estado === "Abierta") {
+                            puertaAbierta = true;
+                            iniciarVozRepetidaAbierta();
+                        } else {
+                            puertaAbierta = false;
+                            detenerVozRepetidaAbierta();
+                            reproducirMensajeVoz("La puerta está cerrada"); // Solo una vez
+                        }
+                    } else {
+                        alert(data.message);
+                    }
+                }, 10000); // Espera de 10 segundos para simular el tiempo de cambio
+            })
+            .catch(error => {
+                progresoModalVisible = false;
+                modalProgresoPuerta.hide();
+                console.error("Error en la solicitud de cambio de estado de la puerta:", error);
+                alert("Error al cambiar el estado de la puerta. Intente nuevamente.");
+            });
+    }
+
+    function iniciarVozRepetidaAbierta() {
+        detenerVoz(); // Detener cualquier mensaje de voz actual
+        detenerVozRepetidaAbierta(); // Limpiar cualquier intervalo anterior
+
+        reproducirMensajeVoz("La puerta está abierta"); // Mensaje inicial
+        intervaloVozAbierta = setInterval(() => {
+            if (puertaAbierta) { // Verifica si la puerta sigue abierta
+                reproducirMensajeVoz("La puerta está abierta");
+            }
+        }, 10000); // Cada 10 segundos
+    }
+
+    function detenerVozRepetidaAbierta() {
+        clearInterval(intervaloVozAbierta);
+        intervaloVozAbierta = null;
+    }
+
+    function reproducirMensajeVoz(mensaje) {
+        detenerVoz(); // Detener cualquier mensaje de voz en progreso
+        const mensajeVoz = new SpeechSynthesisUtterance(mensaje);
+        mensajeVoz.lang = 'es-ES';
+
+        // Solo reproducir el mensaje de voz si el modal de progreso no está visible
+        if (!progresoModalVisible) {
+            speechSynthesis.speak(mensajeVoz);
+        }
+    }
+
+    function detenerVoz() {
+        speechSynthesis.cancel(); // Detener cualquier mensaje de voz en progreso
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const socket1 = new SockJS('/websocket-endpoint');
+        const stompClient1 = Stomp.over(socket1);
+
+        stompClient1.connect({}, function(frame) {
+            stompClient1.subscribe('/topic/alertaPuerta', function(message) {
+                if (!progresoModalVisible) {
+                    detenerVoz();
+                    puertaAbierta = true;
+                    iniciarVozRepetidaAbierta(); // Comienza la repetición de voz
+                }
+            });
+
+            stompClient1.subscribe('/topic/estadoPuerta', function(message) {
+                if (progresoModalVisible) return; // Ignorar si el modal de progreso está activo
+
+                puertaAbierta = (message.body === 'abierta');
+                document.getElementById("estadoPuertaTexto").textContent = puertaAbierta ? "Abierta" : "Cerrada";
+
+                detenerVoz();
+                if (puertaAbierta) {
+                    iniciarVozRepetidaAbierta();
+                } else {
+                    detenerVozRepetidaAbierta();
+                    reproducirMensajeVoz("La puerta está cerrada"); // Solo una vez
+                }
+            });
+        });
+    });
+
+</script>
+
+</body>
+</html>

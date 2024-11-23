@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{base :: head}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${titulo}">Estado de Garaje</title>
+  <!-- CSS de Bootstrap -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Navbar -->
+<div th:replace="~{base :: navbar}"></div>
+
+<!-- Contenido Principal -->
+<div class="container mt-5 d-flex justify-content-center">
+  <div class="card p-4 shadow-lg text-center" style="max-width: 600px; width: 100%;">
+    <h2 class="mb-4">Estado del Garaje</h2>
+
+    <!-- Estado del Garaje -->
+    <div class="temperature-circle">
+      <h3 id="estadoGarajeTexto" th:text="${estadoGaraje}"></h3>
+    </div>
+
+    <!-- Botón para cambiar el estado del garaje -->
+    <button id="toggleEstadoGaraje" class="btn btn-primary mt-3">
+      Cambiar Estado del Garaje
+    </button>
+  </div>
+</div>
+<br>
+
+<!-- Modal de Notificación -->
+<div class="modal fade" id="modalNotificacionGaraje" tabindex="-1" aria-labelledby="modalNotificacionLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalNotificacionLabel">Notificación del Garaje</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="mensajeNotificacionGaraje">
+        <!-- Aquí se mostrará el mensaje del estado del garaje -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para cambio de estado en progreso -->
+<div class="modal fade" id="modalCambioEstado" tabindex="-1" aria-labelledby="modalCambioEstadoLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <p>Cambiando el estado del garaje...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts de Bootstrap y otros scripts necesarios -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const socket = new SockJS('/websocket-endpoint');
+    const stompClient = Stomp.over(socket);
+    let ultimoEstadoGaraje = null;
+    let modalCambioEstado;  // Controlar una sola instancia de este modal
+
+    console.log('Intentando conectar al WebSocket...');
+
+    stompClient.connect({}, function(frame) {
+      console.log('Conectado: ' + frame);
+
+      stompClient.subscribe('/topic/estadoGaraje', function(message) {
+        const estadoGaraje = message.body;
+
+        // Solo mostrar el modal si el estado ha cambiado
+        if (estadoGaraje !== ultimoEstadoGaraje) {
+          ultimoEstadoGaraje = estadoGaraje; // Actualizar el último estado registrado
+
+          // Actualizar el mensaje del modal después de 2 segundos
+          setTimeout(() => {
+            document.getElementById("mensajeNotificacionGaraje").innerText =
+                    `El garaje está ${estadoGaraje === 'abierto' ? 'abierto' : 'cerrado'}`;
+
+            const modalNotificacion = new bootstrap.Modal(document.getElementById('modalNotificacionGaraje'));
+            modalNotificacion.show();
+          }, 2000);
+
+          // Ocultar el modal de "Cambiando el estado..." si está visible
+          if (modalCambioEstado) modalCambioEstado.hide();
+
+          // Actualizar el texto del estado en la página
+          document.getElementById("estadoGarajeTexto").innerText = estadoGaraje.charAt(0).toUpperCase() + estadoGaraje.slice(1);
+        }
+      });
+    }, function(error) {
+      console.error("Error en la conexión WebSocket:", error);
+    });
+
+    // Cambiar estado del garaje al hacer clic en el botón
+    document.getElementById("toggleEstadoGaraje").addEventListener("click", function() {
+      const estadoActual = document.getElementById("estadoGarajeTexto").innerText.toLowerCase();
+      const nuevoEstado = estadoActual === 'abierto' ? 'cerrado' : 'abierto';
+
+      // Mostrar el modal de cambio en progreso solo si no está activo
+      if (!modalCambioEstado) {
+        modalCambioEstado = new bootstrap.Modal(document.getElementById('modalCambioEstado'));
+      }
+      modalCambioEstado.show();
+
+      // Enviar solicitud al servidor para cambiar el estado
+      fetch(`/domotica/cambiarEstadoGaraje?estado=${nuevoEstado}`, { method: 'POST' })
+              .then(response => response.json())
+              .then(data => {
+                if (!data.success) {
+                  console.error("Error al cambiar el estado del garaje.");
+                  modalCambioEstado.hide();
+                }
+              })
+              .catch(error => {
+                console.error("Error en la solicitud:", error);
+                modalCambioEstado.hide();
+              });
+
+      // Forzar cierre del modal de cambio en progreso después de 5 segundos para evitar bloqueos
+      setTimeout(() => {
+        if (modalCambioEstado) {
+          modalCambioEstado.hide();
+        }
+      }, 5000);
+    });
+  });
+</script>
+
+</body>
+</html>

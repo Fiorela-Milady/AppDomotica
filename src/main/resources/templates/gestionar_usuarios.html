@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="base :: head">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Usuarios</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f5f7;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container-main {
+      padding-top: 20px;
+      flex: 1;
+    }
+    .navbar {
+      background-color: #003459;
+    }
+    .navbar .navbar-brand, .navbar .navbar-nav .nav-link {
+      color: #00a8e8;
+    }
+    .navbar .navbar-brand:hover, .navbar .navbar-nav .nav-link:hover {
+      color: #007ea7;
+    }
+    .btn-primary {
+      background-color: #00a8e8;
+      border-color: #007ea7;
+    }
+    .btn-primary:hover {
+      background-color: #007ea7;
+      border-color: #005f73;
+    }
+    .table-dark {
+      background-color: #00171f;
+      color: #ffffff;
+    }
+    .btn-warning {
+      background-color: #007ea7;
+      border-color: #005f73;
+    }
+    .btn-warning:hover {
+      background-color: #005f73;
+      border-color: #003459;
+    }
+    .btn-danger {
+      background-color: #003459;
+      border-color: #00171f;
+    }
+    .btn-danger:hover {
+      background-color: #00171f;
+      border-color: #000000;
+    }
+  </style>
+</head>
+<body>
+
+<div th:replace="base :: navbar"></div>
+
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">Gestión de Usuarios</h2>
+  <a th:href="@{/admin/crear}" class="btn btn-primary mb-3">
+    <i class="fas fa-plus-circle"></i> Agregar Nuevo Usuario
+  </a>
+
+  <table class="table table-striped table-hover">
+    <thead class="table-dark">
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Email</th>
+      <th>Rol</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="usuario : ${usuarios}">
+      <td th:text="${usuario.id}"></td>
+      <td th:text="${usuario.nombre}"></td>
+      <td th:text="${usuario.correo}"></td>
+      <td th:text="${usuario.rol.name()}"></td>
+      <td>
+        <a th:href="@{'/admin/usuario/editar/' + ${usuario.id}}" class="btn btn-warning btn-sm">
+          <i class="fas fa-edit"></i> Editar
+        </a>
+        <a th:href="@{'/admin/usuario/eliminar/' + ${usuario.id}}" class="btn btn-danger btn-sm"
+           onclick="return confirm('¿Estás seguro de eliminar este usuario?');">
+          <i class="fas fa-trash-alt"></i> Eliminar
+        </a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div th:replace="base :: footer"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" crossorigin="anonymous"></script>
+
+</body>
+</html>

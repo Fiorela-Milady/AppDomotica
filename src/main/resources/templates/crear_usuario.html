@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{base :: head}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${titulo}">Gestión de Usuarios</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body>
+
+<!-- Navbar -->
+<div th:replace="~{base :: navbar}"></div>
+
+<!-- Contenido Principal -->
+<div class="container mt-5 d-flex justify-content-center">
+  <div class="card p-4 shadow-lg" style="max-width: 600px; width: 100%;">
+    <h2 class="mb-4 text-center" th:text="${titulo}">Título Dinámico</h2>
+
+    <form th:action="@{/admin/usuario/guardar}" method="post" class="needs-validation" novalidate th:object="${usuario}">
+      <input type="hidden" th:field="*{id}"/>
+      <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre</label>
+        <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+        <div class="invalid-feedback">Por favor, ingresa el nombre del usuario.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="correo" class="form-label">Correo Electrónico</label>
+        <input type="email" class="form-control" id="correo" th:field="*{correo}" required>
+        <div class="invalid-feedback">Por favor, ingresa un correo válido.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Contraseña</label>
+
+        <!-- Mostrar placeholder condicionalmente -->
+        <input type="password" class="form-control" id="password" th:field="*{password}"
+               th:placeholder="${usuario.id != null ? 'Deja vacío para mantener la contraseña actual' : ''}"
+               th:required="${usuario.id == null}"/>
+
+        <!-- Feedback condicional -->
+        <div class="invalid-feedback" th:if="${usuario.id == null}">Por favor, ingresa una contraseña.</div>
+      </div>
+
+
+      <div class="mb-3">
+        <label for="telefono" class="form-label">Teléfono</label>
+        <input type="text" class="form-control" id="telefono" th:field="*{telefono}">
+      </div>
+
+      <div class="mb-3">
+        <label for="rol" class="form-label">Rol</label>
+        <select class="form-select" id="rol" th:field="*{rol}" required>
+          <option value="" disabled>Selecciona un rol</option>
+          <option value="ADMIN" th:selected="*{rol} == 'ADMIN'">Administrador</option>
+          <option value="USUARIO" th:selected="*{rol} == 'USUARIO'">Usuario</option>
+        </select>
+        <div class="invalid-feedback">Por favor, selecciona un rol.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="status" class="form-label">Estado</label>
+        <select class="form-select" id="status" th:field="*{status}" required>
+          <option value="" disabled>Selecciona un estado</option>
+          <option value="ACTIVO" th:selected="*{status} == 'ACTIVO'">Activo</option>
+          <option value="INACTIVO" th:selected="*{status} == 'INACTIVO'">Inactivo</option>
+        </select>
+        <div class="invalid-feedback">Por favor, selecciona un estado.</div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" th:text="${nombre_boton}">Guardar</button>
+      <a th:href="@{/admin/gestionUsuarios}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+
+<br>
+
+<!-- Footer -->
+<div th:replace="~{base :: footer}"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" crossorigin="anonymous"></script>
+
+<script>
+  // Validación de formularios Bootstrap
+  (function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        form.classList.add('was-validated')
+      }, false)
+    })
+  })()
+</script>
+
+</body>
+</html>
